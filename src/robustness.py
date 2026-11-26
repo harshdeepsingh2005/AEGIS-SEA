@@ -1,9 +1,10 @@
-"""Score-stability stress tests under noise, modality dropout, and bounded PCA perturbations."""
+"""Score-stability stress tests under noise, modality dropout, raster-space resolution loss, and bounded PCA perturbations."""
 
 from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
+from .geodata import extract_resolution_degraded_features
 
 
 def _rank_corr(a, b):
@@ -21,7 +22,7 @@ def _top_overlap(a, b, fraction=0.05):
     return len(ia & ib) / k
 
 
-def run_robustness(X, split, out_dir, seed=7):
+def run_robustness(X, split, out_dir, bathy_path=None, gravity_path=None, rc=None, seed=7):
     """Evaluate PCA anomaly-score stability on held-out spatial cells and write robustness.csv."""
     out_dir = Path(out_dir)
     test = split["test"]
@@ -35,14 +36,17 @@ def run_robustness(X, split, out_dir, seed=7):
     rows = []
     rng = np.random.default_rng(seed)
 
-    def _record(name, altered, status="OK"):
-        recon = pca.inverse_transform(pca.transform(altered))
-        score = np.mean((altered - recon) ** 2, axis=1)
+    def _record(name, altered, mask=None, status="OK"):
+        if mask is None:
+            mask = np.ones(len(altered), dtype=bool)
+        recon = pca.inverse_transform(pca.transform(altered[mask]))
+        score = np.mean((altered[mask] - recon) ** 2, axis=1)
+        ref = base_score[mask]
         rows.append({
             "condition": name,
-            "spearman_score_rank_vs_clean": _rank_corr(base_score, score),
-            "mean_absolute_score_change": float(np.mean(np.abs(score - base_score))),
-            "top_5pct_overlap": float(_top_overlap(base_score, score, 0.05)),
+            "spearman_score_rank_vs_clean": _rank_corr(ref, score),
+            "mean_absolute_score_change": float(np.mean(np.abs(score - ref))),
+            "top_5pct_overlap": float(_top_overlap(ref, score, 0.05)),
             "status": status,
         })
 
@@ -54,14 +58,23 @@ def run_robustness(X, split, out_dir, seed=7):
         altered[:, cols] = 0.0  # standardized training mean
         _record(label, altered)
 
-    # Resolution degradation must be applied in raster space before feature extraction.
-    rows.append({
-        "condition": "resolution_degradation",
-        "spearman_score_rank_vs_clean": np.nan,
-        "mean_absolute_score_change": np.nan,
-        "top_5pct_overlap": np.nan,
-        "status": "NOT_RUN: implement raster-space smoothing/coarsening before sampling",
-    })
+    # Raster-space resolution degradation (E8): smooth bathymetry before computing derivatives.
+    if bathy_path is not None and gravity_path is not None and rc is not None:
+        test_rc = rc[test]
+        for sigma_px, label in [(1.0, "resolution_degradation_2x"), (2.0, "resolution_degradation_4x")]:
+            X_deg = extract_resolution_degraded_features(bathy_path, gravity_path, test_rc, sigma_px)
+            finite = np.isfinite(X_deg).all(axis=1)
+            X_deg_scaled = np.zeros_like(Xte)
+            X_deg_scaled[finite] = scaler.transform(X_deg[finite])
+            _record(label, X_deg_scaled, mask=finite)
+    else:
+        rows.append({
+            "condition": "resolution_degradation",
+            "spearman_score_rank_vs_clean": np.nan,
+            "mean_absolute_score_change": np.nan,
+            "top_5pct_overlap": np.nan,
+            "status": "NOT_RUN: raster paths/indices not provided",
+        })
 
     # Model-directed PCA residual step under an L-infinity bound in standardized feature space.
     residual = Xte - base_recon
@@ -71,4 +84,3 @@ def run_robustness(X, split, out_dir, seed=7):
 
     pd.DataFrame(rows).to_csv(out_dir / "robustness.csv", index=False)
     return rows
-

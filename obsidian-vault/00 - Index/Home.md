@@ -13,15 +13,16 @@ status: active
 # AEGIS-SEA — Knowledge & Memory Vault
 
 > [!IMPORTANT] Core Principle
-> **Aegis-Sea 2.0** is an original methodological study on the **reliability of multimodal geophysical anomaly detection** under heterogeneous spatial resolution, incomplete observations, measurement degradation, and constrained adversarial perturbations—using **Lō‘ihi Seamount** (southeast of Hawaiʻi Island, USA) as a case study. It is **not** merely applying an autoencoder to seamount data, and **not** an eruption-prediction system.
+> **Aegis-Sea 2.0** is an original methodological study on the **reliability of multimodal geophysical anomaly detection** under heterogeneous spatial resolution, incomplete observations, measurement degradation, and constrained adversarial perturbations—using **Indian Ocean** volcanic structures as case studies: **Afanasy Nikitin Seamount** (primary, Central Indian Basin) and **Ninety East Ridge** (external cross-region validation). It is **not** merely applying an autoencoder to seamount data, and **not** an eruption-prediction system.
 
-## Current Repository State (Verified 2026-11-26)
-- **Stage:** Research documentation (`Aegis-Sea_Research_Documentation/`, 12 docs across 3 sets) + root starter scaffold (`README.md`, `DATA.md`, `requirements.txt`, `paper/manuscript.md`, `paper/references.bib`).
-- **Missing / Pending Implementation:** `src/` (`src.run_pipeline` referenced in `README.md`) and `data/raw/` (`bathymetry.tif`, `gravity.tif`) are not yet present in the repository.
-- **Verified results:** None — no pipeline runs or experiments have been executed yet.
-- **Hardware target:** MacBook Air M4, 16 GB RAM (CPU-friendly NumPy/SciPy/scikit-learn workflow; no GPU required).
+## Current Repository State (2026-11-26)
+- **Stage:** Gate 1 data acquisition in progress (`ans_srtm15.nc` & `ner_srtm15.nc` downloaded; `grav_34.1.nc` downloading).
+- **Pipeline (`src/`):** Implemented and verified via `tests/test_pipeline_smoke.py` on synthetic `EPSG:32605` GeoTIFFs.
+- **Verified scientific results:** None yet — awaiting real-data pipeline execution.
+- **Hardware target:** MacBook Air M4, 16 GB RAM (CPU-friendly NumPy/SciPy/scikit-learn; no GPU required).
 
 ## Maps of Content (MOCs)
+- [[Complete Walkthrough (Easy & Technical)]] — **Start here** for a plain-English + mathematical walkthrough of everything we built and measured.
 - [[MOC - Research Foundation]] — Charter, scope, RQs/hypotheses, literature review, publication strategy.
 - [[MOC - Technical Architecture]] — Data feasibility, 8-stage geospatial pipeline, model architectures, adversarial threat model & defenses.
 - [[MOC - Execution & Paper]] — E1–E14 protocol, metrics, team roles, 12-week roadmap, reproducibility checklists, and manuscript/starter status.

@@ -3,7 +3,7 @@
 import numpy as np
 import rasterio
 from rasterio.warp import Resampling, reproject
-from scipy.ndimage import generic_filter
+from scipy.ndimage import binary_erosion, gaussian_filter, generic_filter
 
 
 def _read_reference(path):
@@ -62,11 +62,27 @@ def _roughness(arr):
     return generic_filter(arr, _std_valid, size=3, mode="nearest").astype("float32")
 
 
-def _grad_magnitude(arr, valid_mask, dy, dx):
-    """Compute finite-difference gradient magnitude with median fill strictly for derivative stencil."""
-    filled = np.where(np.isfinite(arr), arr, np.nanmedian(arr[valid_mask]))
-    gy, gx = np.gradient(filled, dy, dx)
+def _grad_magnitude(arr, dy, dx):
+    """Compute finite-difference gradient magnitude; NaNs propagate naturally to boundary cells."""
+    gy, gx = np.gradient(arr, dy, dx)
     return np.sqrt(gx**2 + gy**2).astype("float32")
+
+
+def _extract_feature_arrays(bathy, gravity, dy, dx):
+    """Compute the 5 standardized geophysical feature rasters."""
+    slope = _grad_magnitude(bathy, dy, dx)
+    rough = _roughness(bathy)
+    grav_grad = _grad_magnitude(gravity, dy, dx)
+    return [bathy, slope, rough, gravity, grav_grad]
+
+
+def _smooth_raster_nan_aware(arr, valid_mask, sigma_px):
+    """Normalized Gaussian smoothing in raster space preserving NaN boundaries."""
+    weights = valid_mask.astype("float32")
+    num = gaussian_filter(np.where(valid_mask, arr, 0.0), sigma=sigma_px, mode="nearest")
+    den = gaussian_filter(weights, sigma=sigma_px, mode="nearest")
+    out = np.where(valid_mask & (den > 1e-6), num / np.maximum(den, 1e-6), np.nan)
+    return out.astype("float32")
 
 
 def build_feature_dataset(bathy_path, gravity_path, max_cells=150000, seed=42):
@@ -80,18 +96,16 @@ def build_feature_dataset(bathy_path, gravity_path, max_cells=150000, seed=42):
 
     gravity, gmeta = _align_to_reference(gravity_path, transform, crs, bathy.shape)
     gvalid = np.isfinite(gravity)
-    valid = bvalid & gvalid
+    # Erode 1-px border around NaNs so finite-difference derivatives never see artificial cliffs.
+    stencil = np.ones((3, 3), dtype=bool)
+    valid = binary_erosion(bvalid, structure=stencil) & binary_erosion(gvalid, structure=stencil)
 
     dx = abs(float(transform.a))
     dy = abs(float(transform.e))
     if dx <= 0 or dy <= 0:
         raise ValueError("Invalid raster pixel dimensions.")
 
-    slope = _grad_magnitude(bathy, bvalid, dy, dx)
-    rough = _roughness(bathy)
-    grav_grad = _grad_magnitude(gravity, gvalid, dy, dx)
-
-    arrays = [bathy, slope, rough, gravity, grav_grad]
+    arrays = _extract_feature_arrays(bathy, gravity, dy, dx)
     names = [
         "bathymetry",
         "bathymetry_slope",
@@ -116,6 +130,7 @@ def build_feature_dataset(bathy_path, gravity_path, max_cells=150000, seed=42):
 
     xs, ys = rasterio.transform.xy(transform, rows, cols, offset="center")
     coords = np.column_stack([np.asarray(xs), np.asarray(ys)]).astype("float64")
+    rc = np.column_stack([rows, cols]).astype("int32")
 
     metadata = {
         "bathymetry": {
@@ -135,5 +150,16 @@ def build_feature_dataset(bathy_path, gravity_path, max_cells=150000, seed=42):
         "random_seed": seed,
         "warning": "Target grid does not increase native information content of source data.",
     }
-    return X, coords, names, metadata
+    return X, coords, rc, names, metadata
 
+
+def extract_resolution_degraded_features(bathy_path, gravity_path, rc, sigma_px):
+    """Apply raster-space Gaussian smoothing (sigma_px) to bathymetry before recomputing terrain derivatives."""
+    bathy, bvalid, _, transform, crs = _read_reference(bathy_path)
+    gravity, _ = _align_to_reference(gravity_path, transform, crs, bathy.shape)
+    dx, dy = abs(float(transform.a)), abs(float(transform.e))
+
+    bathy_deg = _smooth_raster_nan_aware(bathy, bvalid, sigma_px)
+    arrays = _extract_feature_arrays(bathy_deg, gravity, dy, dx)
+    rows, cols = rc[:, 0], rc[:, 1]
+    return np.column_stack([a[rows, cols] for a in arrays]).astype("float32")

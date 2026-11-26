@@ -63,10 +63,10 @@ def test_pipeline_smoke():
         meta = json.loads((out_dir / "metadata.json").read_text())
         assert meta["sampled_cells_after_filtering"] <= 500
         rob = pd.read_csv(out_dir / "robustness.csv")
-        assert "NOT_RUN" in rob.loc[rob["condition"] == "resolution_degradation", "status"].values[0]
+        for cond in ("resolution_degradation_2x", "resolution_degradation_4x"):
+            assert rob.loc[rob["condition"] == cond, "status"].values[0] == "OK"
 
 
 if __name__ == "__main__":
     test_pipeline_smoke()
     print("Smoke test PASSED.")
-

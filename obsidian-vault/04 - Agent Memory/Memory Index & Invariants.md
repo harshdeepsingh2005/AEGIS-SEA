@@ -21,8 +21,17 @@ created: 2026-11-26
 - `.venv/` — Python 3.11.9 virtual environment with `requirements.txt` installed (`numpy`, `scipy`, `pandas`, `scikit-learn`, `matplotlib`, `rasterio`).
 - `src/` — Implemented `geodata.py`, `models.py`, `robustness.py`, `plots.py`, `run_pipeline.py`.
 - `tests/test_pipeline_smoke.py` — End-to-end smoke test on synthetic projected GeoTIFFs (PASSED on 2026-11-26).
-- `scripts/prepare_rasters.py` — Gate 1 helper to crop/reproject bathymetry & gravity GeoTIFFs to `EPSG:32605` (UTM 5N) and print SHA-256 + native metadata for `DATA.md`.
-- **Not present yet:** Real GeoTIFFs in `data/raw/` (`bathymetry.tif`, `gravity.tif`) and `data/processed/` outputs.
+- `scripts/prepare_rasters.py` — Gate 1 helper to crop/reproject bathymetry & gravity GeoTIFFs to local UTM CRS (`EPSG:32744` for Afanasy Nikitin Seamount, `EPSG:32745` for Ninety East Ridge) and print SHA-256 + native metadata for `DATA.md`.
+- **Gate 1 & Gate 3 Executed (2026-11-26):** Downloaded SRTM15+ bathymetry (`ans_srtm15.nc`, `ner_srtm15.nc`) and Scripps 1-min gravity (`ans_grav.xyz`, `ner_grav.xyz`), projected to `EPSG:32744` (ANS) and `EPSG:32745` (NER), and ran `src.run_pipeline` on both (`150,000` sampled cells each; `~460 m` bathy vs `~1830 m` gravity). See `DATA.md` and `data/processed/{ans,ner}/`.
+- **E8 Resolution Degradation & E13 Cross-Region Transfer Executed (2026-11-26):**
+  - `resolution_degradation_4x` (`sigma=2.0` px raster-space bathymetry smoothing): ANS Spearman `0.997` (top-5% `0.982`), NER Spearman `0.987` (top-5% `0.897`).
+  - `cross_region_transfer.csv`: Asymmetric transfer—`NER -> ANS` combined PCA transfers at Spearman `0.926` (top-5% `0.897`), whereas `ANS -> NER` combined PCA collapses to Spearman `-0.029` (top-5% `0.491`) despite strong single-modality transfer (`0.930` bathy, `0.936` gravity).
+- **E12 Defense Comparison Executed (`src/defenses.py`, 2026-11-26):**
+  - Late-fusion per-modality score aggregation ($S(x) = \frac{1}{|M|} \sum_{m \in M} E_m(x)/\bar{E}_{m,\text{train}}$) fixes `ANS -> NER` collapse (`-0.134 -> 0.936`, top-5% `0.470 -> 0.957`) and improves all missing-modality benchmarks. See `data/processed/defense_comparison.csv`.
+- **Gate 2, 5-Block Spatial CV, Figures & Manuscript Integration (2026-11-26):**
+  - Fixed raster-edge derivative cliff in `src/geodata.py` via 1-px `binary_erosion` mask around `NaN`s.
+  - Verified 7 DOIs in `paper/references.bib`; cross-referenced 5-block OOF peaks against Krishna et al. (2014), Paul et al. (1990), and Sreejith & Krishna (2013).
+  - Ran 5-block spatial CV (`src/spatial_cv.py` -> `spatial_cv_summary.csv`), generated 3 publication figures (`reports/figures/fig1..fig3.png`), and integrated all verified results into `paper/manuscript.md`.
 
 ## 2. Hard Scientific & Engineering Invariants
 1. **No fabricated results:** Never invent metrics, geological labels, maps, or conclusions.

@@ -14,8 +14,10 @@ created: 2026-11-26
 
 ## 1. Identity
 - **Project name:** Aegis-Sea 2.0
-- **Working paper title:** *Reliability and Adversarial Robustness of Multimodal Geophysical Anomaly Detection Under Spatial and Sensor Uncertainty: A Case Study of Lō‘ihi Seamount*
-- **Study area:** Lō‘ihi Seamount, southeast of Hawaiʻi Island, USA.
+- **Working paper title:** *Reliability and Adversarial Robustness of Multimodal Geophysical Anomaly Detection Under Spatial and Sensor Uncertainty: Case Studies in the Indian Ocean (Afanasy Nikitin Seamount & Ninety East Ridge)*
+- **Study areas:**
+  - **Primary:** Afanasy Nikitin Seamount (ANS), Central Indian Basin (`~3°S, 83°E`, UTM Zone 44S `EPSG:32744`).
+  - **External validation:** Ninety East Ridge (NER) segment (`~10°S, 89°E`, UTM Zone 45S `EPSG:32745`).
 - **Domains:** Marine geophysics, geospatial ML, unsupervised anomaly detection, robustness & uncertainty evaluation.
 
 ## 2. Problem Statement & Primary Objective

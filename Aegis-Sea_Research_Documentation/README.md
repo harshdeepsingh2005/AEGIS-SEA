@@ -1,6 +1,6 @@
 # Aegis-Sea 2.0 — Research Documentation
 
-**Working title:** Reliability and Adversarial Robustness of Multimodal Geophysical Anomaly Detection Under Spatial and Sensor Uncertainty: A Case Study of Lō‘ihi Seamount
+**Working title:** Reliability and Adversarial Robustness of Multimodal Geophysical Anomaly Detection Under Spatial and Sensor Uncertainty: Case Studies in the Indian Ocean (Afanasy Nikitin Seamount & Ninety East Ridge)
 
 **Project type:** Original methodological research with a marine-geophysical case study  
 **Team size:** Four researchers, organized into two workstreams  

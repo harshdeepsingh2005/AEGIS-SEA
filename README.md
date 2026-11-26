@@ -7,6 +7,8 @@ It contains no fabricated measurements, labels, metrics, maps, or conclusions.
 
 Reliability of multimodal geophysical anomaly detection under spatial-resolution mismatch,
 missing observations, measurement degradation, and bounded model-directed perturbations.
+Study regions (Indian Ocean): **Afanasy Nikitin Seamount** (primary, Central Indian Basin) and
+**Ninety East Ridge** (external cross-region validation).
 Initial core modalities: bathymetry + gravity. Magnetic data are optional and must pass
 coverage/quality checks before inclusion.
 
@@ -73,7 +75,7 @@ The pipeline writes:
 
 - The first raster (bathymetry) defines the analysis grid. Check its native resolution.
 - Gravity is reprojected using bilinear interpolation. Record source resolution and CRS.
-- The study area must be cropped to a documented Lō‘ihi boundary before running.
+- The study area must be cropped to a documented Indian Ocean region boundary (Afanasy Nikitin Seamount or Ninety East Ridge) before running.
 - The default split is a geographic holdout based on projected x-coordinate blocks.
   Inspect the split map and change it if it does not create a defensible spatial separation.
 - Model scores are **unusualness scores**, not confirmed geological discoveries.

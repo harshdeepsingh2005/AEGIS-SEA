@@ -22,14 +22,14 @@ def main():
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
 
-    X, coords, names, meta = build_feature_dataset(
+    X, coords, rc, names, meta = build_feature_dataset(
         args.bathymetry, args.gravity, max_cells=args.max_cells
     )
-    np.savez_compressed(out / "feature_dataset.npz", X=X, coords=coords, feature_names=np.array(names))
+    np.savez_compressed(out / "feature_dataset.npz", X=X, coords=coords, rc=rc, feature_names=np.array(names))
     (out / "metadata.json").write_text(json.dumps(meta, indent=2))
 
     scores, split = run_baselines(X, coords, out)
-    run_robustness(X, split, out)
+    run_robustness(X, split, out, bathy_path=args.bathymetry, gravity_path=args.gravity, rc=rc)
     make_anomaly_map(coords, scores, out / "anomaly_map.png")
 
     print(f"Completed. Valid samples: {len(X)}; features: {len(names)}")
@@ -39,4 +39,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

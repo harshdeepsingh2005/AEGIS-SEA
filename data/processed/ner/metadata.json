@@ -1,0 +1,58 @@
+{
+  "bathymetry": {
+    "path": "data/raw/ner/bathymetry.tif",
+    "crs": "EPSG:32745",
+    "width": 722,
+    "height": 729,
+    "transform": [
+      458.96212927913695,
+      0.0,
+      554300.8326930257,
+      0.0,
+      -458.96212927913695,
+      9060620.826522388,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "resolution_map_units": [
+      458.96212927913695,
+      458.96212927913695
+    ],
+    "bounds": [
+      554300.8326930257,
+      8726037.434277896,
+      885671.4900325625,
+      9060620.826522388
+    ]
+  },
+  "gravity": {
+    "source": "data/raw/ner/gravity.tif",
+    "crs": "EPSG:32745",
+    "width": 183,
+    "height": 185,
+    "bounds": [
+      554521.985487733,
+      8724992.781525876,
+      887890.195515231,
+      9062004.359968975
+    ],
+    "resolution": [
+      1821.684207800535,
+      1821.684207800535
+    ],
+    "nodata": NaN
+  },
+  "alignment": "gravity reprojected to bathymetry grid using bilinear interpolation",
+  "feature_names": [
+    "bathymetry",
+    "bathymetry_slope",
+    "bathymetry_roughness",
+    "gravity",
+    "gravity_gradient_magnitude"
+  ],
+  "valid_overlap_cells_before_sampling": 516700,
+  "sampled_cells_after_filtering": 150000,
+  "random_seed": 42,
+  "warning": "Target grid does not increase native information content of source data."
+}

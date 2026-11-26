@@ -1,10 +1,20 @@
-/.venv
-/data
-/paper
-/paper
-/obsidian-vault
-/obsidian-vault
-/src/__pycache__
-/paper
-paper/references.bib
-paper/manuscript.md
+# Python & environments
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+
+# Raw & downloaded geophysical data
+data/downloads/
+data/raw/
+
+# Large intermediate processed arrays & per-region score dumps
+data/processed/*/feature_dataset.npz
+data/processed/*/oof_scores.npz
+data/processed/*/baseline_scores.csv
+data/processed/*/anomaly_map.png
+
+# Obsidian workspace state (keep vault notes & graph/app config)
+obsidian-vault/.obsidian/workspace.json
+obsidian-vault/.obsidian/workspace-mobile.json

@@ -1,0 +1,33 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "path:\"00 - Index\"",
+      "color": { "a": 1, "rgb": 14725455 }
+    },
+    {
+      "query": "path:\"01 - Research Foundation\"",
+      "color": { "a": 1, "rgb": 5431523 }
+    },
+    {
+      "query": "path:\"02 - Technical Architecture\"",
+      "color": { "a": 1, "rgb": 5419488 }
+    },
+    {
+      "query": "path:\"03 - Execution & Paper\"",
+      "color": { "a": 1, "rgb": 14701138 }
+    },
+    {
+      "query": "path:\"04 - Agent Memory\"",
+      "color": { "a": 1, "rgb": 14712960 }
+    }
+  ],
+  "showArrow": true
+}
+
